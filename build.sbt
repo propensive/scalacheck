@@ -142,6 +142,7 @@ lazy val jvm = project.in(file("jvm"))
     fork in Test := true,
     libraryDependencies += "org.scala-sbt" %  "test-interface" % "1.0"
   )
+  .settings(dottySettings)
 
 lazy val native = project.in(file("native"))
   .settings(sharedSettings: _*)
@@ -155,3 +156,9 @@ lazy val native = project.in(file("native"))
     )
   )
   .enablePlugins(ScalaNativePlugin)
+
+lazy val dottySettings = List(
+  scalaVersion := dottyLatestNightlyBuild.get,
+  libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value)),
+  scalacOptions := List("-language:Scala2,implicitConversions")
+)
