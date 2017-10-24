@@ -11,8 +11,6 @@ package org.scalacheck
 
 import org.scalacheck.rng.Seed
 
-import language.reflectiveCalls
-
 import util.ConsoleReporter
 
 /** Represents a collection of properties, with convenient methods

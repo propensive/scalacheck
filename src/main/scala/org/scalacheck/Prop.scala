@@ -10,7 +10,6 @@
 package org.scalacheck
 
 import language.implicitConversions
-import language.reflectiveCalls
 
 import rng.Seed
 import util.{Pretty, ConsoleReporter}

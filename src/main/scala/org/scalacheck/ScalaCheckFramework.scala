@@ -10,7 +10,6 @@
 package org.scalacheck
 
 import sbt.testing._
-import scala.language.reflectiveCalls
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.scalacheck.Test.Parameters
