@@ -21,7 +21,7 @@ import scala.util.{Try, Success, Failure}
 object GenSpecification extends Properties("Gen") with GenSpecificationVersionSpecific {
 
   implicit val arbSeed: Arbitrary[Seed] = Arbitrary(
-    arbitrary[Long] flatMap Seed.apply
+    arbitrary[Long].map(Seed.apply)
   )
 
   property("pureApply #300") = {

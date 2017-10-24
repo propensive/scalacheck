@@ -98,9 +98,11 @@ sealed abstract class Seed extends Serializable {
 
 object Seed {
 
-  private case class apply(a: Long, b: Long, c: Long, d: Long) extends Seed {
+  private case class SeedImpl(a: Long, b: Long, c: Long, d: Long) extends Seed {
     override def toString: String = s"""Seed.fromBase64("$toBase64")"""
   }
+
+  def apply(a: Long, b: Long, c: Long, d: Long): Seed = SeedImpl(a, b, c, d)
 
   /** Generate a deterministic seed. */
   def apply(s: Long): Seed = {
