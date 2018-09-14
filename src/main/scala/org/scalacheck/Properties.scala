@@ -72,7 +72,7 @@ class Properties(val name: String) {
         }
       case (_, os) =>
         println(s"Incorrect options: $os")
-        Test.cmdLineParser.printHelp
+        Test.cmdLineParser.printHelp()
         System.exit(-1)
     }
 
