@@ -423,7 +423,7 @@ object GenSpecification extends Properties("Gen") with GenSpecificationVersionSp
   )
 
   property("22 field case class works") = forAll(Gen.resultOf(Full22.tupled)){
-    Full22.unapply(_).get.isInstanceOf[Tuple22[_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_]]
+    _.isInstanceOf[Full22]
   }
 
   type Trilean = Either[Unit, Boolean]
