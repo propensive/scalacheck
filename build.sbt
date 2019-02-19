@@ -158,7 +158,6 @@ lazy val native = project.in(file("native"))
   .enablePlugins(ScalaNativePlugin)
 
 lazy val dottySettings = List(
-  scalaVersion := dottyLatestNightlyBuild.get,
   libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value)),
   scalacOptions := List("-language:Scala2,implicitConversions")
 )
