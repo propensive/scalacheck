@@ -8,7 +8,7 @@ object Examples extends Properties("Examples") {
     (n :: l).tail == l
   }
 
-  property("list head") = Prop.forAll { l: List[Int] =>
+  property("list head") = Prop.forAll { (l: List[Int]) =>
     if (l.isEmpty) {
       Prop.throws(classOf[java.util.NoSuchElementException]) { l.head }
     } else {
@@ -19,10 +19,10 @@ object Examples extends Properties("Examples") {
   case class Person (
     firstName: String,
     lastName: String,
-    age: Int 
-  ) { 
+    age: Int
+  ) {
     def isTeenager = age >= 13 && age <= 19
-  } 
+  }
 
   val genPerson = {
     import org.scalacheck.Gen.{choose, oneOf}
@@ -37,7 +37,7 @@ object Examples extends Properties("Examples") {
 
   implicit val arbPerson: Arbitrary[Person] = Arbitrary(genPerson)
 
-  property("ex1") = Prop.forAll { p: Person =>
+  property("ex1") = Prop.forAll { (p: Person) =>
     p.isTeenager == (p.age >= 13 && p.age <= 19)
   }
 

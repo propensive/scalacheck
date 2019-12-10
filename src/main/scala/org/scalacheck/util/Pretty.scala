@@ -33,7 +33,7 @@ object Pretty {
   def apply(f: Params => String): Pretty = new Pretty { def apply(p: Params) = f(p) }
 
   def pretty[T](t: T, prms: Params)(implicit ev: T => Pretty): String = {
-    val p = (ev(t): Pretty) match {
+    val p = ev(t) match {
       case null => prettyAny(null)
       case p => p
     }
@@ -115,12 +115,12 @@ object Pretty {
   }
 
   implicit def prettyThrowable(e: Throwable): Pretty = Pretty { prms =>
-    val strs = e.getStackTrace.map { st =>
+    val strs = (e.getStackTrace: Seq[StackTraceElement]).map { st =>
       import st._
       getClassName+"."+getMethodName + "("+getFileName+":"+getLineNumber+")"
     }
 
-    val strs2 =
+    val strs2: Seq[String] =
       if(prms.verbosity <= 0) Array[String]()
       else if(prms.verbosity <= 1) strs.take(5)
       else strs

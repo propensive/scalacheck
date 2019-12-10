@@ -108,7 +108,7 @@ sealed abstract class Gen[+T] extends Serializable { self =>
     def doApply(p: P, seed: Seed) =
       p.useInitialSeed(seed) { (p0, s0) =>
         val res = Gen.this.doApply(p0, s0)
-        res.copy(s = { x:T => res.sieve(x) && f(x) })
+        res.copy(s = { (x:T) => res.sieve(x) && f(x) })
       }
     override def sieveCopy(x: Any) =
       try Gen.this.sieveCopy(x) && f(x.asInstanceOf[T])
@@ -382,7 +382,7 @@ object Gen extends GenArities with GenVersionSpecific {
       new Choose[Long] {
         def choose(low: Long, high: Long): Gen[Long] =
           if (low > high) throw new IllegalBoundsError(low, high)
-        else gen(chLng(low,high))
+          else gen(chLng(low,high))
       }
 
     implicit val chooseInt: Choose[Int] =
@@ -599,7 +599,7 @@ object Gen extends GenArities with GenVersionSpecific {
   ): Gen[C] =
     sequence[C,T](Traversable.fill(n)(g)) suchThat { c =>
       // TODO: Can we guarantee c.size == n (See issue #89)?
-      c.forall(g.sieveCopy)
+      evt(c).forall(g.sieveCopy)
     }
 
   /** Generates a container of any Traversable type for which there exists an
@@ -610,7 +610,7 @@ object Gen extends GenArities with GenVersionSpecific {
     evb: Buildable[T,C], evt: C => Traversable[T]
   ): Gen[C] =
     sized(s => choose(0, s max 0).flatMap(buildableOfN[C,T](_,g))) suchThat { c =>
-      if (c == null) g.sieveCopy(null) else c.forall(g.sieveCopy)
+      if (c == null) g.sieveCopy(null) else evt(c).forall(g.sieveCopy)
     }
 
   /** Generates a non-empty container of any Traversable type for which there
@@ -621,7 +621,7 @@ object Gen extends GenArities with GenVersionSpecific {
   def nonEmptyBuildableOf[C,T](g: Gen[T])(implicit
     evb: Buildable[T,C], evt: C => Traversable[T]
   ): Gen[C] =
-    sized(s => choose(1, s max 1).flatMap(buildableOfN[C,T](_,g))) suchThat(_.size > 0)
+    sized(s => choose(1, s max 1).flatMap(buildableOfN[C,T](_,g))) suchThat(evt(_).size > 0)
 
   /** A convenience method for calling `buildableOfN[C[T],T](n,g)`. */
   def containerOfN[C[_],T](n: Int, g: Gen[T])(implicit
@@ -698,7 +698,7 @@ object Gen extends GenArities with GenVersionSpecific {
     choose(1, gs.length+2).flatMap(pick(_, g1, g2, gs: _*))
 
   /** A generator that randomly picks a given number of elements from a list
-   * 
+   *
    * The elements are not guaranteed to be permuted in random order.
    */
   def pick[T](n: Int, l: Iterable[T]): Gen[collection.Seq[T]] = {
@@ -726,7 +726,7 @@ object Gen extends GenArities with GenVersionSpecific {
   }
 
   /** A generator that randomly picks a given number of elements from a list
-   * 
+   *
    * The elements are not guaranteed to be permuted in random order.
    */
   def pick[T](n: Int, g1: Gen[T], g2: Gen[T], gn: Gen[T]*): Gen[Seq[T]] = {

@@ -64,23 +64,22 @@ object PropertyFilterSpecification extends Properties("PropertyFilter") {
             val propNames = props.map(_._1)
 
             if (pf.exists(_.contains("*numbers"))) {
-              val expected =
-                Seq(
-                  "PropertyFilterSample.positive numbers",
-                  "PropertyFilterSample.negative numbers"
-                )
+              val expected = Seq(
+                "PropertyFilterSample.positive numbers",
+                "PropertyFilterSample.negative numbers"
+              )
 
-                prop(pf, propNames, expected)
+              prop(pf, propNames, expected)
             } else if (pf.exists(_.contains("*alpha"))) {
               val expected = Seq("PropertyFilterSample.lowercase alpha characters")
 
               prop(pf, propNames, expected)
             } else { //no filter
               val expected = Seq(
-                  "PropertyFilterSample.positive numbers",
-                  "PropertyFilterSample.negative numbers",
-                  "PropertyFilterSample.lowercase alpha characters"
-                )
+                "PropertyFilterSample.positive numbers",
+                "PropertyFilterSample.negative numbers",
+                "PropertyFilterSample.lowercase alpha characters"
+              )
 
               prop(pf, propNames, expected)
             }

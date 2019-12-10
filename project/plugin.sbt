@@ -11,4 +11,4 @@ addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.3.9")
 
 scalacOptions += "-deprecation"
 
-addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.2.2")
+addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.3.4")

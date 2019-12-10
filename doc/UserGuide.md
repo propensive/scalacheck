@@ -903,13 +903,7 @@ object CounterSpecification extends Commands {
    *  If you want to allow only one [[Sut]] instance to exist at any given time
    *  (a singleton [[Sut]]), implement this method the following way:
    *
-   *  {{{
-   *  def canCreateNewSut(newState: State, initSuts: Traversable[State]
-   *    runningSuts: Traversable[Sut]
-   *  ) = {
-   *    initSuts.isEmpty && runningSuts.isEmpty
-   *  }
-   *  }}}
+   *  { initSuts.isEmpty && runningSuts.isEmpty }
    */
   def canCreateNewSut(newState: State, initSuts: Traversable[State],
     runningSuts: Traversable[Sut]): Boolean = true
