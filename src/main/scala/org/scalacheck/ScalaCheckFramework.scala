@@ -99,7 +99,7 @@ private abstract class ScalaCheckRunner extends Runner {
       val propertyFilter = params.propFilter.map(_.r)
 
       if (single) {
-        val names = taskDef.selectors flatMap {
+        val names = this.taskDef.selectors flatMap {
           case ts: TestSelector => Array(ts.testName)
           case _ => Array.empty[String]
         }
