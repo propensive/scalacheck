@@ -93,77 +93,80 @@ private abstract class ScalaCheckRunner extends Runner {
       }
   }
 
-  def checkPropTask(taskDef: TaskDef, single: Boolean) = new BaseTask(taskDef) {
-    def execute(handler: EventHandler, loggers: Array[Logger]): Array[Task] = {
-      val params = applyCmdParams(properties.foldLeft(Parameters.default)((params, props) => props.overrideParameters(params)))
-      val propertyFilter = params.propFilter.map(_.r)
+  def checkPropTask(taskDef: TaskDef, single: Boolean) = {
+    class PropTask extends BaseTask(taskDef) {
+      def execute(handler: EventHandler, loggers: Array[Logger]): Array[Task] = {
+        val params = applyCmdParams(properties.foldLeft(Parameters.default)((params, props) => props.overrideParameters(params)))
+        val propertyFilter = params.propFilter.map(_.r)
 
-      if (single) {
-        val names = this.taskDef.selectors flatMap {
-          case ts: TestSelector => Array(ts.testName)
-          case _ => Array.empty[String]
-        }
-        names foreach { name =>
-          for ((`name`, prop) <- props)
+        if (single) {
+          val names = this.taskDef.selectors flatMap {
+            case ts: TestSelector => Array(ts.testName)
+            case _ => Array.empty[String]
+          }
+          names foreach { name =>
+            for ((`name`, prop) <- props)
+              executeInternal(prop, name, handler, loggers, propertyFilter)
+          }
+        } else {
+          for ((name, prop) <- props)
             executeInternal(prop, name, handler, loggers, propertyFilter)
         }
-      } else {
-        for ((name, prop) <- props)
-          executeInternal(prop, name, handler, loggers, propertyFilter)
+        Array.empty[Task]
       }
-      Array.empty[Task]
-    }
 
-    def executeInternal(prop: Prop, name: String, handler: EventHandler, loggers: Array[Logger], propertyFilter: Option[scala.util.matching.Regex]): Unit = {
-      if (propertyFilter.isEmpty || propertyFilter.exists(matchPropFilter(name, _))) {
+      def executeInternal(prop: Prop, name: String, handler: EventHandler, loggers: Array[Logger], propertyFilter: Option[scala.util.matching.Regex]): Unit = {
+        if (propertyFilter.isEmpty || propertyFilter.exists(matchPropFilter(name, _))) {
 
-        import util.Pretty.{pretty, Params}
-        val params = applyCmdParams(properties.foldLeft(Parameters.default)((params, props) => props.overrideParameters(params)))
-        val result = Test.check(params, prop)
+          import util.Pretty.{pretty, Params}
+          val params = applyCmdParams(properties.foldLeft(Parameters.default)((params, props) => props.overrideParameters(params)))
+          val result = Test.check(params, prop)
 
-        val event = new Event {
-          val status = result.status match {
-            case Test.Passed => Status.Success
-            case _: Test.Proved => Status.Success
-            case _: Test.Failed => Status.Failure
-            case Test.Exhausted => Status.Failure
-            case _: Test.PropException => Status.Error
+          val event = new Event {
+            val status = result.status match {
+              case Test.Passed => Status.Success
+              case _: Test.Proved => Status.Success
+              case _: Test.Failed => Status.Failure
+              case Test.Exhausted => Status.Failure
+              case _: Test.PropException => Status.Error
+            }
+            val throwable = result.status match {
+              case Test.PropException(_, e, _) => new OptionalThrowable(e)
+              case _: Test.Failed => new OptionalThrowable(
+                new Exception(pretty(result, Params(0)))
+              )
+              case _ => new OptionalThrowable()
+            }
+            val fullyQualifiedName = PropTask.this.taskDef.fullyQualifiedName
+            val selector = new TestSelector(name)
+            val fingerprint = PropTask.this.taskDef.fingerprint
+            val duration = -1L
           }
-          val throwable = result.status match {
-            case Test.PropException(_, e, _) => new OptionalThrowable(e)
-            case _: Test.Failed => new OptionalThrowable(
-              new Exception(pretty(result, Params(0)))
-            )
-            case _ => new OptionalThrowable()
+
+          handler.handle(event)
+
+          event.status match {
+            case Status.Success => successCount.incrementAndGet()
+            case Status.Error => errorCount.incrementAndGet()
+            case Status.Skipped => errorCount.incrementAndGet()
+            case Status.Failure => failureCount.incrementAndGet()
+            case _ => failureCount.incrementAndGet()
           }
-          val fullyQualifiedName = this.taskDef.fullyQualifiedName
-          val selector = new TestSelector(name)
-          val fingerprint = this.taskDef.fingerprint
-          val duration = -1L
+          testCount.incrementAndGet()
+
+          // TODO Stack traces should be reported through event
+          val verbosityOpts = Set("-verbosity", "-v")
+          val verbosity =
+            args.grouped(2).filter(twos => verbosityOpts(twos.head))
+              .toSeq.headOption.map(_.last).map(_.toInt).getOrElse(0)
+          val s = if (result.passed) "+" else "!"
+          val n = if (name.isEmpty) PropTask.this.taskDef.fullyQualifiedName else name
+          val logMsg = s"$s $n: ${pretty(result, Params(verbosity))}"
+          log(loggers, result.passed, logMsg)
         }
-
-        handler.handle(event)
-
-        event.status match {
-          case Status.Success => successCount.incrementAndGet()
-          case Status.Error => errorCount.incrementAndGet()
-          case Status.Skipped => errorCount.incrementAndGet()
-          case Status.Failure => failureCount.incrementAndGet()
-          case _ => failureCount.incrementAndGet()
-        }
-        testCount.incrementAndGet()
-
-        // TODO Stack traces should be reported through event
-        val verbosityOpts = Set("-verbosity", "-v")
-        val verbosity =
-          args.grouped(2).filter(twos => verbosityOpts(twos.head))
-            .toSeq.headOption.map(_.last).map(_.toInt).getOrElse(0)
-        val s = if (result.passed) "+" else "!"
-        val n = if (name.isEmpty) this.taskDef.fullyQualifiedName else name
-        val logMsg = s"$s $n: ${pretty(result, Params(verbosity))}"
-        log(loggers, result.passed, logMsg)
       }
     }
+    new PropTask
   }
 }
 
