@@ -136,9 +136,9 @@ private abstract class ScalaCheckRunner extends Runner {
             )
             case _ => new OptionalThrowable()
           }
-          val fullyQualifiedName = taskDef.fullyQualifiedName
+          val fullyQualifiedName = this.taskDef.fullyQualifiedName
           val selector = new TestSelector(name)
-          val fingerprint = taskDef.fingerprint
+          val fingerprint = this.taskDef.fingerprint
           val duration = -1L
         }
 
@@ -159,7 +159,7 @@ private abstract class ScalaCheckRunner extends Runner {
           args.grouped(2).filter(twos => verbosityOpts(twos.head))
             .toSeq.headOption.map(_.last).map(_.toInt).getOrElse(0)
         val s = if (result.passed) "+" else "!"
-        val n = if (name.isEmpty) taskDef.fullyQualifiedName else name
+        val n = if (name.isEmpty) this.taskDef.fullyQualifiedName else name
         val logMsg = s"$s $n: ${pretty(result, Params(verbosity))}"
         log(loggers, result.passed, logMsg)
       }
