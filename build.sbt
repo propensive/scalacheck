@@ -52,7 +52,7 @@ lazy val sharedSettings = MimaSettings.settings ++ scalaVersionSettings ++ Seq(
   unmanagedSourceDirectories in Compile += (baseDirectory in LocalRootProject).value / "src" / "main" / "scala",
 
   unmanagedSourceDirectories in Compile += {
-    val s = if (scalaMajorVersion.value >= 13) "+" else "-"
+    val s = if (scalaMajorVersion.value >= 13 || scalaVersion.value.startsWith("3")) "+" else "-"
     (baseDirectory in LocalRootProject).value / "src" / "main" / s"scala-2.13$s"
   },
 
