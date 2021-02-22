@@ -7,7 +7,7 @@ case class GeneratedFile(name: String, code: String)
 object codegen {
 
   def main(args: Array[String]): Unit = {
-    val dir = new File(src)
+    val dir = new File("src")
     genAll.foreach { gen =>
       dir.mkdirs()
       val file = new File(dir, gen.name)
