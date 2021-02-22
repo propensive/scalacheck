@@ -1,3 +1,5 @@
+import java.io._
+
 // Generates Arbitrary instance for tuples and functions
 
 case class GeneratedFile(name: String, code: String)
