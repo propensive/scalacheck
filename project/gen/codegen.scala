@@ -3,7 +3,18 @@
 case class GeneratedFile(name: String, code: String)
 
 object codegen {
-  
+
+  def main(args: Array[String]): Unit = {
+    val dir = new File(src)
+    genAll.foreach { gen =>
+      dir.mkdirs()
+      val file = new File(dir, gen.name)
+      val writer = new BufferedWriter(new FileWriter(file))
+      writer.write(gen.code)
+      writer.close()
+    }
+  }
+
   def csv(s: Seq[String]) = s mkString ", "
   def typed(s: Seq[(String,String)]) = s map { case (v,t) => s"$v:$t"}
   def wrapType(t: String, w:String) = s"$w[$t]"
